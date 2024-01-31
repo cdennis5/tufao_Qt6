@@ -27,13 +27,14 @@
 #include "headers.h"
 
 #include <QtNetwork/QAbstractSocket>
+#include <QSslError>
 
 #if defined(NO_ERROR) && defined(_WIN32)
 # define TUFAO_WINERROR_WORKAROUND
 # undef NO_ERROR
 #endif
 
-class QSslError;
+//class QSslError;
 
 namespace Tufao {
 

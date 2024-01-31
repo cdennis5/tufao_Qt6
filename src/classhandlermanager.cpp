@@ -195,14 +195,14 @@ void ClassHandlerManager::addPluginLocation(const QString location)
 /* ************************************************************************** */
 /* Private Methods                                                            */
 /* ************************************************************************** */
-void ClassHandlerManager::dispatchVoidMethod(QMetaMethod method,
+void ClassHandlerManager::dispatchVoidMethod(HttpServerRequest & request, HttpServerResponse & response, QMetaMethod method,
                                              ClassHandler * handler,
                                              const QGenericArgument * args) const
 {
     method.invoke(handler,
                   Qt::DirectConnection,
-                  args[0],
-                  args[1],
+                  Q_ARG(HttpServerRequest, request),
+                  Q_ARG(HttpServerResponse, response),
                   args[2],
                   args[3],
                   args[4],
@@ -214,7 +214,7 @@ void ClassHandlerManager::dispatchVoidMethod(QMetaMethod method,
                   );
 }
 
-void ClassHandlerManager::dispatchJSONMethod(HttpServerResponse & response,
+void ClassHandlerManager::dispatchJSONMethod(HttpServerRequest & request, HttpServerResponse & response,
                                              QMetaMethod method,
                                              ClassHandler *handler,
                                              const QGenericArgument *args) const
@@ -223,8 +223,8 @@ void ClassHandlerManager::dispatchJSONMethod(HttpServerResponse & response,
     bool wasInvoked = method.invoke(handler,
                                     Qt::DirectConnection,
                                     Q_RETURN_ARG(QJsonObject, result),
-                                    args[0],
-                                    args[1],
+                                    Q_ARG(HttpServerRequest, request),
+                                    Q_ARG(HttpServerResponse, response),
                                     args[2],
                                     args[3],
                                     args[4],
@@ -268,8 +268,10 @@ bool ClassHandlerManager::processRequest(HttpServerRequest & request,
 
         // Create the arguments
         QGenericArgument argumentTable[10];
-        argumentTable[0] = Q_ARG(Tufao::HttpServerRequest, request);
-        argumentTable[1] = Q_ARG(Tufao::HttpServerResponse, response);
+
+        // In Qt6, Q_ARG returns a QMetaMethodArgument which cannot be assigned to QGenericArgument
+        // argumentTable[0] = Q_ARG(Tufao::HttpServerRequest, request);
+        // argumentTable[1] = Q_ARG(Tufao::HttpServerResponse, response);
 
         // We need this to keep objects in scope until the actual invoke() call.
         QVariant variants[10];
@@ -299,9 +301,9 @@ bool ClassHandlerManager::processRequest(HttpServerRequest & request,
         }
         if(canHandle) {
             if(method.returnType() == QMetaType::QJsonObject) {
-                this->dispatchJSONMethod(response, method, handler->handler, argumentTable);
+                this->dispatchJSONMethod(request, response, method, handler->handler, argumentTable);
             } else {
-                this->dispatchVoidMethod(method, handler->handler, argumentTable);
+                this->dispatchVoidMethod(request, response, method, handler->handler, argumentTable);
             }
             handled = true;
         }
@@ -408,7 +410,7 @@ bool ClassHandlerManager::handleRequest(Tufao::HttpServerRequest & request, Tufa
         return ret;
     }();
 
-    QStringList pathComponents = namespacedPath.split("/", QString::SkipEmptyParts);
+    QStringList pathComponents = namespacedPath.split("/", Qt::SkipEmptyParts);
 
 
     // There must be at least two path components (class & method)

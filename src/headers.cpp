@@ -60,7 +60,7 @@ QDateTime Headers::toDateTime(const QByteArray &headerValue,
 QDebug operator<<(QDebug dbg, const Headers &headers)
 {
     for (Headers::const_iterator i = headers.begin(); i != headers.end();++i)
-        dbg.nospace() << i.key() << ": " << i.value() << endl;
+        dbg.nospace() << i.key() << ": " << i.value() << Qt::endl;
 
     return dbg.space();
 }

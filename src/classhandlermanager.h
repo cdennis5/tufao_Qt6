@@ -136,8 +136,8 @@ private:
                         const QString methodName,
                         const QHash<QString, QString> arguments);
 
-    void dispatchVoidMethod(QMetaMethod method, ClassHandler * handler, const QGenericArgument * args) const;
-    void dispatchJSONMethod(HttpServerResponse & response,
+    void dispatchVoidMethod(HttpServerRequest & request, HttpServerResponse & response, QMetaMethod method, ClassHandler * handler, const QGenericArgument * args) const;
+    void dispatchJSONMethod(HttpServerRequest & request, HttpServerResponse & response,
                             QMetaMethod method,
                             ClassHandler * handler,
                             const QGenericArgument * args) const;

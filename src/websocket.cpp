@@ -493,7 +493,7 @@ void WebSocket::onConnected()
         headerValue.reserve(16);
 
         for (int i = 0;i < 16;i += SUBSTR_SIZE) {
-            chunk.i = qrand();
+            chunk.i = QRandomGenerator::global()->generate();
             headerValue.append(chunk.str, qMin(SUBSTR_SIZE, 16 - i));
         }
 
@@ -561,11 +561,13 @@ void WebSocket::connectToHost(QAbstractSocket *socket,
 
     connect(priv->socket, &QAbstractSocket::readyRead,
             this, &WebSocket::onReadyRead);
-    {
-        void(QAbstractSocket::*errorSignal)(QAbstractSocket::SocketError)
-                = &QAbstractSocket::error;
-        connect(priv->socket, errorSignal, this, &WebSocket::onSocketError);
-    }
+    connect(priv->socket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(onSocketError(QAbstractSocket::SocketError)));
+    // {
+    //     void(QAbstractSocket::*errorSignal)(QAbstractSocket::SocketError)
+    //             = &QAbstractSocket::error;
+    //     connect(priv->socket, errorSignal, this, &WebSocket::onSocketError);
+    // }
 }
 
 inline bool WebSocket::isResponseOkay()
